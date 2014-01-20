@@ -146,7 +146,7 @@ class ManagedNetwork extends AbstractNetwork {
 	
 	public function run($inputs) {
 		$id = $this->id;
-		$data = NeuralMesh::$app->model->getCache($id.$inputs);
+		$data = NeuralMesh::model::getCache($id.$inputs);
 		
 		if($data === null) { //not found in cache
 			$inputarray = str_split($inputs);

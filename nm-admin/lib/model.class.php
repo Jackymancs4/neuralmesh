@@ -17,6 +17,7 @@ class Model {
 		require_once(Controller::$root."proxy/train.class.php");
 		require_once(Controller::$root."proxy/validation.class.php");
 		require_once(Controller::$root."proxy/users.class.php");
+		require_once(Controller::$root."proxy/backpropagation.nmesh.class.php");
 		// But not past here :)
 		mysql::init(); //specify XML files
 		$this->nav = new Navigation;
@@ -55,7 +56,7 @@ class Model {
 		return $output;
 	}
 	
-	function getCache($id) {
+	static function getCache($id) {
 		$q = mysql::query("cache.get",array("id"=>$id));
 		if($q->num_rows) {
 			$data = $q->fetch_array();
@@ -64,9 +65,11 @@ class Model {
 		return null;
 	}
 	
-	function saveCache($hash,$id,$data) {
-		mysql::query("cache.save",array("id"=>$hash,"network"=>$id,"data"=>$data));
-	}
+	static function saveCache($hash,$id,$data) {
+		if (CACHE_EXIST==true) {
+        mysql::query("cache.save",array("id"=>$hash,"network"=>$id,"data"=>$data));
+	  }
+  }
 	
 	/**
 	 * Update the cache with the new outputs
@@ -77,7 +80,7 @@ class Model {
 		foreach($data as $set) {
 			$inputs = str_split(trim($set['pattern']));
 			$outputs = $nn->run($inputs);
-			mysql::query("cache.save",array("id"=>$id.trim($set['pattern']),"network"=>$id,"data"=>implode("|",$outputs)));
+			model::saveCache($id.trim($set['pattern']),$id,implode("|",$outputs));
 		}
 	}
 	
@@ -93,7 +96,7 @@ class Model {
 	 * @param $data Output array
 	 */
 	function quick_cache($id,$input,$data) {
-		mysql::query("cache.save",array("id"=>$id.trim($input),"network"=>$id,"data"=>implode("|",$data)));
+		model::saveCache($id.trim($input),$id,implode("|",$data));
 	}
 }
 ?>

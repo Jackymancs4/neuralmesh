@@ -5,12 +5,13 @@
 define("DB_HOST","localhost"); //Your database host
 define("DB_USER","root"); //Your username to the database
 define("DB_PASS",""); //Your password for the account
-define("DB_NAME","testinstall"); //The database name
+define("DB_NAME","neuralnet"); //The database name
 
 /**
  * Cache Control
  * (set to 'never' if you never want that type of cache emptied)
  */
+define("CACHE_EXIST", false);
 define("CACHE_LIFE","30"); //how long the network DB cache lasts in days  
 define("UNMANAGED_LIFE","1"); //how long unmanaged networks last before being deleted
 define("META_CACHE_LIFE","10"); //how long in days the meta cache lasts

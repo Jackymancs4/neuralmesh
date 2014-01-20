@@ -17,8 +17,7 @@ $nn = $app->model->network->nn;
 echo "<div>Inputs: <span class='number'>".$nn->inputs."</span><br />";
 echo "Outputs: <span class='number'>".$nn->outputs."</span></div>";
 
-$tree = $app->model->getCache($_GET['n']."tree");
-echo ($tree===null) ? $app->model->network->buildTree($_GET['n'],$nn) : $tree;
+echo $app->model->network->buildTree($_GET['n'],$nn);
 ?>
 </div>
 

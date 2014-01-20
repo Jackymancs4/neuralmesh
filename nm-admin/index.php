@@ -1,4 +1,11 @@
 <?php
+
+if (!file_exists("nm-settings.php"))
+{
+ // reindirizzamento alla home page in caso di login mancato
+ header("Location: nm-install.php");
+}
+
 require("lib/controller.class.php");
 $app = new Controller;
 

@@ -4,7 +4,7 @@
 	<query name="removeAll">
 	<![CDATA[
 	DELETE FROM patterns
-	WHERE trainsetID = :id
+	WHERE setID = :id
 	]]>
 	</query>
 	
@@ -12,7 +12,7 @@
 	<![CDATA[
 	SELECT *
 	FROM patterns
-	WHERE trainsetID = :id
+	WHERE setID = :id
 	]]>
 	</query>
 	
@@ -25,7 +25,7 @@
 	
 	<query name="add">
 	<![CDATA[
-	INSERT INTO patterns(trainsetID,pattern,output)
+	INSERT INTO patterns(setID,pattern,output)
 	VALUES (:id,:pattern,:output)
 	]]>
 	</query>
@@ -33,8 +33,8 @@
 	<query name="getSet">
 	<![CDATA[
 	SELECT * 
-	FROM trainsets t INNER JOIN patterns p ON p.trainsetID = t.trainsetID 
-	WHERE t.trainsetID = :id
+	FROM sets t INNER JOIN patterns p ON p.setID = t.setID 
+	WHERE t.setID = :id
 	]]>
 	</query>
 </queries>

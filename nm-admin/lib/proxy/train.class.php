@@ -11,16 +11,16 @@ class train {
 		mysql::query("epoch.store",array("id"=>$nid,"iterations"=>$epoch,"startmse"=>$start_mse,"endmse"=>$end_mse,"time"=>$time,"train"=>$sid));
 	}
 
-    function listTrainingSets($id) {
-		$q = mysql::query("train.getAll",array("id"=>$id));
+    function listTrainingSets($id, $type="t") {
+		$q = mysql::query("train.getAll",array("id"=>$id, "type"=>$type));
 		if($q->num_rows) {
 			$data = mysql::fetch_all($q);
 			foreach($data as $row) {
-				$tid = $row['trainsetID'];
+				$tid = $row['setID'];
 				echo "<tr><td>".$row['label']."</a></td>";
-				echo "<td><a href='nm-edit-set.php?s=$tid&n=$id' title='Manage'><img src='images/pencil.png' /></a> ";
+				echo "<td><a href='nm-edit-".$type."set.php?s=$tid&n=$id' title='Manage'><img src='images/pencil.png' /></a> ";
 				echo "<a href='nm-manage-set.php?action=delete&s=$tid' title='Delete'><img src='images/cross.png' /></a> ";
-				echo "<a href='nm-run-set.php?s=$tid' title='Run Training Set'><img src='images/run.png' /></a> ";
+				echo "<a href='nm-run-".$type."set.php?s=$tid' title='Run Training Set'><img src='images/run.png' /></a> ";
 				echo "<a href='nm-set-history.php?s=$tid&n=$id' title='View History'><img src='images/time.png' /></a></td></tr>";
 			}
 		} else {
@@ -68,7 +68,7 @@ class train {
 				echo "<td>".$row['endMSE']."</td>";
 				echo "<td>".date("j/m/Y g:i:s a",strtotime($row['epochDate']))."</td>";
 				echo "<td>".$row['execTime']."</td>";
-				echo "<td>".($row['trainsetID'] == null ? "n" : "y")."</td></tr>";
+				echo "<td>".($row['setID'] == null ? "n" : "y")."</td></tr>";
 			}
 		} else {
 			echo "<tr><td colspan='6'><span>No History</span></td></tr>";

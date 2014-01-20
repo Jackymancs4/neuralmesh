@@ -12,10 +12,14 @@
  * 
  * @author Louis Stowasser
  */
+
 class nmesh
 {
 	/** Array of layer objects */
 	public $layer = array();
+  
+	public $talgorithm;
+        
 	/** Count of inputs */
 	public $inputs;
 	/** Count of outputs */
@@ -24,10 +28,6 @@ class nmesh
 	static public $momentumrate = 0.5;
 	/** Cached output */
 	static public $cache;
-	
-	function sigmoid($value) {
-		return 1 / (1+exp(-1*$value));
-	}
 	
 	/**
 	 * Takes some input and runs the network
@@ -43,15 +43,16 @@ class nmesh
 			
 			foreach($this->layer[$l]->neuron as $neuron) {
 				$inputs = ($l===0) ? $inputarray : $output[$l];
-				
+				//echo ($l+1)." - ";
 				$x = 0; $sum = 0;
 				foreach($neuron->synapse as $synapse) {
+          //echo $x.",";
 					$synapse->input = $inputs[$x];
 					$sum += $synapse->weight * $synapse->input;
-					++$x;
+					$x++;
 				}
-
-				$value = 1/(1+exp(-1*($sum+$neuron->bias)));
+        //echo "<br>";
+				$value = $neuron->sigmoid($sum+$neuron->bias);
 				$neuron->value = $value;
 				$output[$l+1][] = $value;
 			}
@@ -90,54 +91,14 @@ class nmesh
 	 * @param $learningrate The rate at which it learns
 	 * @return The global MSE (how intelligent the network is)
 	 */
-	function train($inputarray,$outputarray,$learningrate)
+	  
+  function train($inputarray,$outputarray,$learningrate)
 	{
 		$this->run($inputarray);  //Run a feedforward pass as normal
-		return $this->calculate_deltas($outputarray,$learningrate);
-	}
-	
-	/**
-	 * This peforms the backpropagation algorithm on the network
-	 * @param $outputarray Based on the last run, teach it to return this
-	 * @param $lr The learning rate
-	 * @return The global MSE of this training epoch
-	 */
-	function calculate_deltas($outputarray,$lr)
-	{
-		$mse_sum = 0;
-		$l_count = count($this->layer)-1;
-		$m = nmesh::$momentumrate;
-		$error = array();
-		$output_count = count($this->layer[$l_count]->neuron);
-		
-		for($l = $l_count; $l >= 0; --$l) {
-			
-			$error[$l] = array_fill(0,count($this->layer[$l]->neuron[0]->synapse),0);
-			
-			foreach($this->layer[$l]->neuron as $n=>$neuron) 
-			{
-				if($l===$l_count) {
-					$n_error = $outputarray[$n] - $neuron->value;
-					$mse_sum += $n_error * $n_error;
-				} else $n_error = $error[$l+1][$n];
-				
-				$delta = $n_error * $neuron->value * (1 - $neuron->value);
-				
-				foreach($neuron->synapse as $s=>$synapse)
-				{
-					$wc = $delta * $synapse->input * $lr + $synapse->momentum * $m;
-					$synapse->momentum = $wc;
-					$synapse->weight += $wc;
-					$error[$l][$s] += $delta * $synapse->weight;
-				}
-				//And lets go ahead and adjust the bias too
-				$biaschange = $delta * $lr + $neuron->momentum * $m;
-				$neuron->momentum = $biaschange;
-				$neuron->bias += $biaschange;
-			}
-		}
-		return $mse_sum / $output_count;
-	}
+		//return $this->calculate_deltas($outputarray,$learningrate);
+        
+    return $this->talgorithm->calculate_deltas($outputarray,$learningrate,$this->layer);
+  }
 	
 	/*
 	 * Basic sigmoid derivative
@@ -268,20 +229,23 @@ class nmesh
 	 * Constructor for creating a neural network object
 	 */
 	function nmesh($input_neurons,$output_neurons,$hidden_neurons_per_layer,$hidden_layers,$neuronal_bias=1,$initial_weightrange=1)
-	{
-		$this->inputs = $input_neurons;
+	{  
+    
+    $this->inputs = $input_neurons;
 		$this->outputs= $output_neurons;
 		$firstlayerflag = 0;
 		$total_layers = $hidden_layers+1;
 		
+    $this->talgorithm = new algorithm();
+            
 		$this->layer[0] = new layer($hidden_neurons_per_layer,$input_neurons,$neuronal_bias,$initial_weightrange);
 		for($i=1;$i<$total_layers-1;$i++)
 		{
-			$inputs = $input_neurons;
-			if($firstlayerflag==1) //second hidden layer
-			{
+			//$inputs = $input_neurons;
+			//if($firstlayerflag==1) //second hidden layer
+			//{
 				$inputs = $hidden_neurons_per_layer; //use the hidden neurons
-			}
+			//}
 			$this->layer[$i] = new layer($hidden_neurons_per_layer,$inputs,$neuronal_bias,$initial_weightrange);
 			$firstlayerflag=1;
 		}
@@ -417,7 +381,8 @@ class neuron
 	 */
 	function sigmoid($value)
 	{
-		return 1 / (1+exp(-1*$value));
+		//return $value;
+    return 1 / (1+exp(-1*$value));
 	}
 	
 	/**
@@ -483,8 +448,9 @@ class synapse
 	 */
 	function randomize_weight($weightrange)
 	{
-		$this->weight = (mt_rand(0,$weightrange*2000)/1000)-$weightrange;
-	}
+		  $this->weight = (mt_rand(0,$weightrange*2000)/1000)-$weightrange;
+	    //$this->weight = 0;
+  }
 	
 	/**
 	 * Synapse constructor

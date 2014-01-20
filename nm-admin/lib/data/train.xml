@@ -4,46 +4,46 @@
 	<query name="get">
 	<![CDATA[
 	SELECT *
-	FROM trainsets
-	WHERE trainsetID = :id
+	FROM sets
+	WHERE setID = :id
 	]]>
 	</query>
 
 	<query name="getAll">
 	<![CDATA[
 	SELECT *
-	FROM trainsets
-	WHERE networkID = :id
+	FROM sets
+	WHERE networkID = :id AND type = :type
 	]]>
 	</query>
 	
 	<query name="update">
 	<![CDATA[
-	UPDATE trainsets
+	UPDATE sets
 	SET label = :label 
-	WHERE trainsetID = :id
+	WHERE setID = :id
 	]]>
 	</query>
 	
 	<query name="add">
 	<![CDATA[
-	INSERT INTO trainsets(networkID,label)
-	VALUES(:id,:label)
+	INSERT INTO sets(networkID,label,type)
+	VALUES(:id,:label,:type)
 	]]>
 	</query>
 	
 	<query name="remove">
 	<![CDATA[
-	DELETE FROM trainsets
-	WHERE trainsetID = :id
+	DELETE FROM sets
+	WHERE setID = :id
 	]]>
 	</query>
 	
 	<query name="validate">
 	<![CDATA[
 	SELECT u.networkID
-	FROM trainsets t INNER JOIN usernetwork u ON t.networkID = u.networkID
-	WHERE t.trainsetID = :id AND u.userID = :user
+	FROM sets t INNER JOIN usernetwork u ON t.networkID = u.networkID
+	WHERE t.setID = :id AND u.userID = :user
 	]]>
 	</query>
 </queries>

@@ -7,8 +7,17 @@ class mysql {
 	private static $queries;
 	
 	public static function init() {
-		self::$db = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME); //edit in nm-settings.php
+		self::$db = new mysqli(DB_HOST,DB_USER,DB_PASS); //edit in nm-settings.php
 		self::$queries = array();
+    
+		    if(!$selezione = self::$db->select_db(DB_NAME))
+        {
+		      $q = self::$db->query("CREATE DATABASE ".DB_NAME) or die (mysql_error());
+          $selezione = self::$db->select_db(DB_NAME);
+        }
+        
+   return true;
+         
 	}
 
 	public static function query($name, $parameters = array(), $force=false) {
@@ -70,5 +79,41 @@ class mysql {
 		}
 		return $data;
 	}
+
+
+  public static function import_sql_file($location){
+    
+    //load file
+    $commands = file_get_contents($location);
+
+    //delete comments
+    
+    $lines = explode("\n",$commands);
+    $commands = '';
+    foreach($lines as $line){
+        $line = trim($line);
+        if( $line && !(substr($line, 0, strlen('--')) == '--') ){
+            $commands .= $line . "\n";
+        }
+    }
+
+    //convert to array
+    $commands = explode(";", $commands);
+
+    //run commands
+    $total = $success = 0;
+    foreach($commands as $command){
+        if(trim($command)){
+            $success += (self::$db->query($command)==false ? 0 : 1);
+            $total += 1;
+        }
+    }
+
+    //return number of successful queries and total number of queries found
+    return array(
+        "success" => $success,
+        "total" => $total
+    );
+  }
 }
 ?>

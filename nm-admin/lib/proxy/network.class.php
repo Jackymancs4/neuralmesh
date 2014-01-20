@@ -95,12 +95,17 @@ class network {
 			for($n=0;$n<$ncount;$n++) {
 				$uuid++;
 				if($n==0) $output .= "<ul id='ul$uuid'>";
-				$output .= "<li class='neuron'><a href='javascript:void(0);' onclick=\"toggle('ul".($uuid+1)."',this);\">+</a> Neuron ".($n+1);
+				if(isset($nn->layer[$l]->neuron[$n]->value) && $nn->layer[$l]->neuron[$n]->value!="") {
+          $nvalue = $nn->layer[$l]->neuron[$n]->value;
+        } else {
+          $nvalue = "none";
+        }
+        $output .= "<li class='neuron'><a href='javascript:void(0);' onclick=\"toggle('ul".($uuid+1)."',this);\">+</a> Neuron ".($n+1).", Value: ".$nvalue;
 				$scount = count($nn->layer[$l]->neuron[$n]->synapse);
 				for($s=0;$s<$scount;$s++) {
 					$uuid++;
 					if($s==0) $output .= "<ul id='ul$uuid' style='display:none'>";
-					$output .= "<li class='synapse'>Synapse ".($s+1)."</li>";
+					$output .= "<li class='synapse'>Synapse ".($s+1).", Value: ".($nn->layer[$l]->neuron[$n]->synapse[$s]->weight)."</li>";
 					if($s==$scount-1) $output .= "</ul>";
 					
 				}
@@ -110,7 +115,8 @@ class network {
 			$output .= "</li>";
 		}
 		$output .= "</ul>";
-		mysql::query("cache.save",array("id"=>$id."tree","network"=>$id,"data"=>$output));
+    
+      model::saveCache($id."tree",$id,$output);
 		return $output;
 	}
 }

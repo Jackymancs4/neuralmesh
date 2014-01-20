@@ -3,7 +3,7 @@
 <queries>	
 	<query name="store">
 	<![CDATA[
-	INSERT INTO epochs(networkID,iterations,startMSE,endMSE,epochDate,execTime,trainsetID) 
+	INSERT INTO epochs(networkID,iterations,startMSE,endMSE,epochDate,execTime,setID) 
 	VALUES(:id,:iterations,:startmse,:endmse,now(),:time,:train)
 	]]>
 	</query>
@@ -12,7 +12,7 @@
 	<![CDATA[
 	SELECT *
 	FROM epochs
-	WHERE trainsetID = :id
+	WHERE setID = :id
 	ORDER BY epochDate desc
 	]]>
 	</query>

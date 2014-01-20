@@ -41,11 +41,11 @@ CREATE TABLE IF NOT EXISTS `epochs` (
   `startMSE` decimal(10,9) unsigned NOT NULL,
   `endMSE` decimal(10,9) unsigned NOT NULL,
   `epochDate` datetime NOT NULL,
-  `execTime` decimal(15,8) unsigned NOT NULL DEFAULT '0.00000000',
-  `trainsetID` int(5) DEFAULT NULL,
+  `execTime` decimal(15,8) unsigned DEFAULT '0.00000000',
+  `setID` int(5) DEFAULT NULL,
   PRIMARY KEY (`epochID`),
   KEY `networkID` (`networkID`),
-  KEY `trainsetID` (`trainsetID`)
+  KEY `setID` (`setID`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -77,24 +77,25 @@ CREATE TABLE IF NOT EXISTS `networks` (
 
 CREATE TABLE IF NOT EXISTS `patterns` (
   `patternID` int(5) unsigned NOT NULL AUTO_INCREMENT,
-  `trainsetID` int(5) unsigned NOT NULL,
+  `setID` int(5) unsigned NOT NULL,
   `pattern` varchar(255) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
   `output` varchar(255) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
   PRIMARY KEY (`patternID`),
-  KEY `train` (`trainsetID`)
+  KEY `train` (`setID`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `trainsets`
+-- Table structure for table `sets`
 --
 
-CREATE TABLE IF NOT EXISTS `trainsets` (
-  `trainsetID` int(5) unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `sets` (
+  `setID` int(5) unsigned NOT NULL AUTO_INCREMENT,
   `networkID` int(5) unsigned NOT NULL,
   `label` varchar(20) NOT NULL,
-  PRIMARY KEY (`trainsetID`),
+  `type` enum("t","v") NOT NULL DEFAULT "t",  
+  PRIMARY KEY (`setID`),
   KEY `network` (`networkID`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
@@ -145,12 +146,12 @@ ALTER TABLE `epochs`
 -- Constraints for table `patterns`
 --
 ALTER TABLE `patterns`
-  ADD CONSTRAINT `patterns_ibfk_1` FOREIGN KEY (`trainsetID`) REFERENCES `trainsets` (`trainsetID`) ON DELETE CASCADE;
+  ADD CONSTRAINT `patterns_ibfk_1` FOREIGN KEY (`setID`) REFERENCES `sets` (`setID`) ON DELETE CASCADE;
 
 --
--- Constraints for table `trainsets`
+-- Constraints for table `sets`
 --
-ALTER TABLE `trainsets`
+ALTER TABLE `sets`
   ADD CONSTRAINT `trainsets_ibfk_1` FOREIGN KEY (`networkID`) REFERENCES `networks` (`networkID`) ON DELETE CASCADE;
 
 --

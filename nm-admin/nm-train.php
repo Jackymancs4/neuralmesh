@@ -14,6 +14,7 @@ $app->display("header",false);
 	<form action="nm-manage-set.php?action=new" method="post">
 	<input type="text" name="label" />
 	<input type="hidden" name="n" value="<?php echo $_GET['n']; ?>" />
+	<input type="hidden" name="type" value="t" />
 	<input type="submit" value="Add" />
 	</form>
 	</fieldset>

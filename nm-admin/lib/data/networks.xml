@@ -80,9 +80,9 @@
 	(SELECT COUNT(*) as networks
 	FROM usernetwork u3
 	WHERE u3.userID = :id) networks,
-	(SELECT COUNT(*) as trainsets
-	FROM usernetwork u4 INNER JOIN trainsets t ON t.networkID = u4.networkID
-	WHERE u4.userID = :id) trainsets,
+	(SELECT COUNT(*) as sets
+	FROM usernetwork u4 INNER JOIN sets t ON t.networkID = u4.networkID
+	WHERE u4.userID = :id) sets,
 	(SELECT ROUND(SUM(e.execTime),2) as exec
 	FROM usernetwork u5 INNER JOIN epochs e ON u5.networkID = e.networkID
 	WHERE u5.userID = :id) exec,

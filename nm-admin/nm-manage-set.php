@@ -28,7 +28,7 @@ switch($_GET['action']) {
 		
 	case "new":
 		$app->model->val->run("newset",$_POST);
-		mysql::query("train.add",array("id"=>$_POST['n'],"label"=>$_POST['label']));
+		mysql::query("train.add",array("id"=>$_POST['n'],"label"=>$_POST['label'],"type"=>$_POST['type']));
 		break;
 		
 }
