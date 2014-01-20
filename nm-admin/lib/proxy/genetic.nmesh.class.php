@@ -1,88 +1,41 @@
 <?php
 
-class algorithm{
+class algorithm {
 
-	private $banks = array();
+	private $population;
 	const MAX_GENERATIONS = 50000;
 	const FITNESS_THRESHOLD = 0;
+  
+  private $generation=0;
 
-	public function __construct($banks = NULL)
+	public function __construct()
 	{
-		try{
-			if(is_null($banks)){
-				throw new Exception('Error, no se ha especificado # de bancos');
-			}
-			$this->init($banks);
-		}catch(Exception $e){
-			die($e->getMessage());
-		}		
+
 	}
 	
-	private function init($banks)
+	public function getBestCandidates(){
+
+			return $this->population->getBestCitizens();
+	}
+	
+	public function setObjective($objective = NULL){
+
+			$this->population->setObjective($objective);
+	}
+	
+	public function startUp()
 	{
-		for($x=0; $x<$banks; $x++){
-			$this->banks[$x] = new Population();
-		}
+			$this->population->startUp();
+			$this->population->calculateFitness();
+			$this->population->assignBestCitizens();
 	}
 	
-	public function getBank($bank = NULL){
-		try{
-			if(is_null($bank)){
-				throw new Exception('Error, falta especificar banco');
-			}
-			return $this->banks[$bank];
-		}catch(Exception $e){
-			die($e->getMessage());
-		}
-	}
-	
-	public function getBestCandidates($bank = NULL){
-		try{
-			if(is_null($bank)){
-				throw new Exception('Error, falta especificar banco');
-			}
-			return $this->banks[$bank]->getBestCitizens();
-		}catch(Exception $e){
-			die($e->getMessage());
-		}
-	}
-	
-	public function setObjective($bank = NULL, $objective = NULL){
-		try{
-			if(is_null($bank) || is_null($objective)){
-				throw new Exception('Error, falta especificar banco u objetivo');
-			}
-			$this->banks[$bank]->setObjective($objective);
-		}catch(Exception $e){
-			die($e->getMessage());
-		}
-	}
-	
-	public function startUp($bank = NULL)
-	{
-		try{
-			if(is_null($bank)){
-				throw new Exception('Error, falta especificar banco');
-			}
-			$this->banks[$bank]->startUp();
-			$this->banks[$bank]->calculateFitness();
-			$this->banks[$bank]->assignBestCitizens();
-		}catch(Exception $e){
-			die($e->getMessage());
-		}
-	}
-	
-	public function isFinished($bank = NULL, $fitness_threshold = 0){
-		try{
-			if(is_null($bank)){
-				throw new Exception('Error, falta especificar banco');
-			}
-			$bests = $this->getBestCandidates($bank);
+	public function isFinished($fitness_threshold = 0){
+
+			$bests = $this->getBestCandidates(0);
 			$can0 = $bests[0]->getFitness();
 			return ($can0 == $fitness_threshold);
-		}catch(Exception $e){
-			die($e->getMessage());
-		}
+      
 	}
 	
 	function microtime_float()
@@ -91,28 +44,56 @@ class algorithm{
     return ((float)$useg + (float)$seg);
   }
 	
-	public function start($bank = NULL){
-		try{
-			if(is_null($bank)){
-				throw new Exception('Error, falta especificar banco');
+  public function getSynWeight ($layer) {
+		$weight = array();
+    
+    $l_count = count($layer);
+    for($l = 0; $l < $l_count; ++$l) { // Now we walk through each layer of the net
+			
+			foreach($layer[$l]->neuron as $neuron) {
+
+				foreach($neuron->synapse as $synapse) {
+
+					$weight[] = $synapse->weight;
+				}
+
+				$weight[] = $neuron->bias;
 			}
+		}
+
+    return $weight;
+  }
+  
+  public function start ($outputarray,$learningrate,$layer) {
+
+      if ($this->generation == 0) {
+    		$this->population = new Population();
+        $this->population->population[0]= new Citizen();
+        $this->population->population[0]->setData($this->getSynWeight($layer));
+        $this->population->startUp();
+        $this->generation++;
+      }           
+  }
+  
+	public function sstart($bank = NULL){
+
 			//BUCLE HASTA ENCONTRAR EL MEJOR CANDIDATO
 			$end = FALSE;
 			$generation = 0;
 			$stime = $this->microtime_float();
 			while($end == FALSE && $generation < self::MAX_GENERATIONS){
 				//CREAMOS CANDIDATOS A PARTIR DE LOS DOS MEJORES CANDIDATOS DE LA GENERACIÓN ANTERIOR
-				$this->banks[$bank]->reproduce();
+				$this->population->reproduce();
 
 				//MUTAMOS LOS CANDIDATOS DE LA GENERACIÓN ACTUAL
-				$this->banks[$bank]->mutate();
+				$this->population->mutate();
 
 				//EVALUAMOS LOS CANDIDATOS Y ESTABLECEMOS LOS DOS MEJORES DE ESTA GENERACIÓN
-				$this->banks[$bank]->calculateFitness();
-				$this->banks[$bank]->assignBestCitizens();
+				$this->population->calculateFitness();
+				$this->population->assignBestCitizens();
 
 				//PRINTAMOS POR PANTALLA LOS DOS MEJORES CANDIDATOS DE ESTA GENERACIÓN
-				$bests = $this->banks[$bank]->getBestCitizens();
+				$bests = $this->population->getBestCitizens();
 				echo "GENERATION: $generation" . PHP_EOL."<br>";
 				$i = 0;
 				foreach($bests as $b){
@@ -126,19 +107,16 @@ class algorithm{
 			}
 			$ftime = $this->microtime_float();
 			echo "Time evolving: " . ($ftime - $stime) . 'sec' . PHP_EOL . PHP_EOL;
-			return $this->banks[$bank]->getBestCitizens();
-		}catch(Exception $e){
-			die($e->getMessage());
-		}
+			return $this->population->getBestCitizens();
+
 	}
 }
 
 class Population{
 	
-	const MAX_POPULATION = 10000;
-	private $population = array();
-	private $bestCitizens = array();
-	private $objective = '';
+	const MAX_POPULATION = 2000;
+	public $population = array();
+	public $bestCitizens = array();
 	
 	public function __construct(){
 		$this->init();
@@ -157,29 +135,21 @@ class Population{
 		for($x=0; $x<self::MAX_POPULATION; $x++){
 			$this->population[$x]->calculateFitness($this->objective);
 		}
-	} 
-	
-	public function setObjective($objective = NULL){
-		try{
-			if(is_null($objective)){
-				throw new Exception('Error, no se ha especificado objetivo');
-			}
-			$this->objective = $objective;
-		}catch(Exception $e){
-			die($e->getMessage());
-		}
 	}
 	
 	public function startUp(){
-		for($x=0; $x<self::MAX_POPULATION; $x++){
-			$this->population[$x]->setData($this->randomData(strlen($this->objective)));
+		for($x=1; $x<self::MAX_POPULATION; $x++){
+			$this->population[$x]->setData($this->randomData(count($this->population[0])));
+      echo implode(" - ",$this->population[$x]->getData());
 		}
 	}
 	
 	private function randomData($length){
-		$temp = '';
+
+    $temp = array();
+
 		for($x=0;$x<$length;$x++){
-			$temp .= chr(mt_rand(32, 126));
+			$temp[]=(mt_rand(0,1*20000)/10000)-1;
 		}
 		return $temp;
 	}
@@ -233,7 +203,7 @@ class Population{
 	}
 }
 
-class Citizen{
+class Citizen {
 	
 	private $data;
 	private $fitness;
@@ -251,13 +221,7 @@ class Citizen{
 	
 	public function setData($newData = NULL)
 	{
-		try{
-			if(!is_null($newData)){
-				$this->data = $newData;
-			}
-		}catch(Exception $e){
-			die($e->getMessage());
-		}
+		$this->data = $newData;
 	}
 	
 	public function getFitness()
@@ -267,32 +231,17 @@ class Citizen{
 	
 	public function setFitness($newFitness = NULL)
 	{
-		try{
-			if(!is_null($newFitness)){
-				$this->fitness = $newFitness;
-			}
-		}catch(Exception $e){
-			die($e->getMessage());
-		}
-			
+		$this->fitness = $newFitness;        
 	}
 	
 	public function calculateFitness($objective = NULL){
-		try{
-			if(is_null($objective)){
-				throw new Exception('Error, no se ha especificado objetivo');
-			}
-			
+
 			$fitness = 0;
 			for($x=0;$x<strlen($objective);$x++){
 				$fitness += abs(ord($objective[$x]) - ord($this->data[$x]));
 			}
 			
-			$this->setFitness($fitness);
-		}catch(Exception $e){
-			die($e->getMessage());
-		}
-		
+			$this->setFitness($fitness);		
 	}
 	
 }

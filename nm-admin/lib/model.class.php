@@ -17,7 +17,7 @@ class Model {
 		require_once(Controller::$root."proxy/train.class.php");
 		require_once(Controller::$root."proxy/validation.class.php");
 		require_once(Controller::$root."proxy/users.class.php");
-		require_once(Controller::$root."proxy/backpropagation.nmesh.class.php");
+		require_once(Controller::$root."proxy/genetic.nmesh.class.php");
 		// But not past here :)
 		mysql::init(); //specify XML files
 		$this->nav = new Navigation;

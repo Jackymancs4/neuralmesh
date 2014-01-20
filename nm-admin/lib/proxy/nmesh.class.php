@@ -97,7 +97,8 @@ class nmesh
 		$this->run($inputarray);  //Run a feedforward pass as normal
 		//return $this->calculate_deltas($outputarray,$learningrate);
         
-    return $this->talgorithm->calculate_deltas($outputarray,$learningrate,$this->layer);
+    return $this->talgorithm->start($outputarray,$learningrate,$this->layer);
+    //return 1;
   }
 	
 	/*

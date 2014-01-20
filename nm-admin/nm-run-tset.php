@@ -34,7 +34,7 @@ for($e=0;$e<$data['epochmax'];$e++) { //loop over max epochs
 }
 
 $end_time = microtime(true) - $start_time;
-$app->model->train->saveEpoch($nid,$e+1,$start_mse,$epochaverage,$end_time,$_GET['s']);
+$app->model->train->saveEpoch($nid,$e,$start_mse,$epochaverage,$end_time,$_GET['s']);
 $app->model->update_cache($nid,$training_data,$nn);
 
 $app->model->network->save($nn,$nid);
